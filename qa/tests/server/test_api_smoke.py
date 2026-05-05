@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 def test_register_create_project_create_items_and_matrix(
     tmp_path, isolated_app_factory
 ) -> None:
-    """Full smoke test: register, create project, add risk + opportunity, verify matrix."""
+    """Register, create project, add risk + opportunity, and verify matrix counts"""
     db_file = tmp_path / "api_smoke.db"
     app = isolated_app_factory(f"sqlite+pysqlite:///{db_file}")
     with TestClient(app) as c:

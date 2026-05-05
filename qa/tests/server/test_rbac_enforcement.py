@@ -15,6 +15,7 @@ def _headers(token):
 
 
 def test_viewer_can_read_but_not_create(tmp_path, isolated_app_factory):
+    """Viewer role can list risks but is forbidden from creating new ones"""
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path / 'rbac.db'}")
     with TestClient(app) as c:
         admin_token = _auth(c, "admin@test.com")
@@ -52,6 +53,7 @@ def test_viewer_can_read_but_not_create(tmp_path, isolated_app_factory):
 
 
 def test_member_can_create_but_not_delete(tmp_path, isolated_app_factory):
+    """Member role can create risks but is forbidden from deleting them"""
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path / 'rbac2.db'}")
     with TestClient(app) as c:
         admin_token = _auth(c, "admin@test.com")
@@ -91,6 +93,7 @@ def test_member_can_create_but_not_delete(tmp_path, isolated_app_factory):
 
 
 def test_manager_can_delete(tmp_path, isolated_app_factory):
+    """Manager role can both create and delete risks"""
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path / 'rbac3.db'}")
     with TestClient(app) as c:
         admin_token = _auth(c, "admin@test.com")

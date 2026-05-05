@@ -11,6 +11,7 @@ def _register(c, email="user@example.com", password="SecurePass123!"):
 
 
 def test_refresh_rotates_tokens(tmp_path, isolated_app_factory):
+    """Refresh endpoint rotates both access and refresh tokens, revokes the old refresh"""
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path / 'ref.db'}")
     with TestClient(app) as c:
         tokens = _register(c)
@@ -36,6 +37,7 @@ def test_refresh_rotates_tokens(tmp_path, isolated_app_factory):
 
 
 def test_refresh_with_garbage_token_returns_401(tmp_path, isolated_app_factory):
+    """Refresh with an invalid/garbage token returns HTTP 401"""
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path / 'ref2.db'}")
     with TestClient(app) as c:
         r = c.post("/refresh", json={"refresh_token": "garbage-token-abc"})

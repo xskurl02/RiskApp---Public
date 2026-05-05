@@ -2,6 +2,7 @@ from __future__ import annotations
 
 
 def test_outbox_squashes_multiple_changes_for_same_entity_id(tmp_path) -> None:
+    """Outbox squashes successive upserts for the same risk into a single pending change"""
     from riskapp_client.adapters.local_storage.sqlite_data_store import LocalStore
     from riskapp_client.adapters.local_storage.sync_outbox_queue import OutboxStore
 
@@ -48,6 +49,7 @@ def test_outbox_squashes_multiple_changes_for_same_entity_id(tmp_path) -> None:
 def test_requeue_conflict_creates_new_change_id_and_updates_base_version(
     tmp_path,
 ) -> None:
+    """Requeueing a conflicted change assigns a new change_id and the server's base_version"""
     from riskapp_client.adapters.local_storage.sqlite_data_store import LocalStore
     from riskapp_client.adapters.local_storage.sync_outbox_queue import OutboxStore
 
@@ -85,6 +87,7 @@ def test_requeue_conflict_creates_new_change_id_and_updates_base_version(
 
 
 def test_get_blocked_changes_exposes_conflict_reason_and_title(tmp_path) -> None:
+    """Blocked outbox entries expose the conflict reason, server_version, and entity title"""
     from riskapp_client.adapters.local_storage.sqlite_data_store import LocalStore
     from riskapp_client.adapters.local_storage.sync_outbox_queue import OutboxStore
 
@@ -128,6 +131,7 @@ def test_get_blocked_changes_exposes_conflict_reason_and_title(tmp_path) -> None
 
 
 def test_helpdesk_outbox_uses_ticket_version_for_base_version(tmp_path) -> None:
+    """Helpdesk outbox upsert records the ticket's local version as the base_version"""
     from riskapp_client.adapters.local_storage.sqlite_data_store import LocalStore
     from riskapp_client.adapters.local_storage.sync_outbox_queue import OutboxStore
 
@@ -174,6 +178,7 @@ def test_helpdesk_outbox_uses_ticket_version_for_base_version(tmp_path) -> None:
 
 
 def test_helpdesk_delete_unsynced_ticket_discards_pending_change(tmp_path) -> None:
+    """Deleting an unsynced helpdesk ticket discards its pending outbox change"""
     from riskapp_client.adapters.local_storage.sqlite_data_store import LocalStore
     from riskapp_client.adapters.local_storage.sync_outbox_queue import OutboxStore
     from riskapp_client.services.helpdesk_service import HelpDeskService

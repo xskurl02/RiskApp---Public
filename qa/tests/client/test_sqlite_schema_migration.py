@@ -64,6 +64,7 @@ def _create_legacy_db(path: str) -> None:
 def test_assessment_fk_migration_removes_risks_fk_and_adds_opportunity_id(
     tmp_path,
 ) -> None:
+    """SQLite migration drops legacy risks-FK on assessments and adds opportunity_id/item_* columns"""
     db_file = tmp_path / "legacy.db"
     _create_legacy_db(str(db_file))
     # Opening LocalStore triggers ensure_schema() and runs the migration.

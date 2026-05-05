@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 def test_push_with_stale_base_version_returns_conflict(
     tmp_path, isolated_app_factory
 ):
+    """Sync push with a stale base_version returns a version_mismatch conflict"""
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path / 'conflict.db'}")
     with TestClient(app) as c:
         r = c.post(

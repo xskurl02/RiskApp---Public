@@ -2,6 +2,7 @@ from __future__ import annotations
 
 
 def test_recalculate_item_scores_uses_max_impact_dimension() -> None:
+    """recalculate_item_scores picks the max impact dimension and computes prob*impact"""
     from riskapp_server.core.scoring import recalculate_item_scores
 
     class Obj:
@@ -21,6 +22,7 @@ def test_recalculate_item_scores_uses_max_impact_dimension() -> None:
 
 
 def test_recalculate_item_scores_no_dims_keeps_impact() -> None:
+    """recalculate_item_scores keeps the existing impact when no dimensions are set"""
     from riskapp_server.core.scoring import recalculate_item_scores
 
     class Obj:

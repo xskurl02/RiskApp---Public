@@ -32,6 +32,7 @@ def _setup(c):
 
 
 def test_create_and_update_assessment(tmp_path, isolated_app_factory):
+    """Create then update an assessment, verifying score recalc and version bump"""
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path / 'assess.db'}")
     with TestClient(app) as c:
         h, pid, rid = _setup(c)
@@ -62,6 +63,7 @@ def test_create_and_update_assessment(tmp_path, isolated_app_factory):
 
 
 def test_list_assessments(tmp_path, isolated_app_factory):
+    """List assessments for a risk returns the assessments created so far"""
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path / 'assess2.db'}")
     with TestClient(app) as c:
         h, pid, rid = _setup(c)
@@ -82,6 +84,7 @@ def test_list_assessments(tmp_path, isolated_app_factory):
 def test_assessment_on_nonexistent_item_returns_404(
     tmp_path, isolated_app_factory
 ):
+    """Assessing a non-existent risk returns HTTP 404"""
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path / 'assess3.db'}")
     with TestClient(app) as c:
         h, pid, rid = _setup(c)

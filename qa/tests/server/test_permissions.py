@@ -6,6 +6,7 @@ import pytest
 
 
 def test_ensure_role_at_least_blocks_lower_roles() -> None:
+    """ensure_role_at_least raises HTTP 403 for roles below the required minimum"""
     from fastapi import HTTPException
     from riskapp_server.core.permissions import ensure_role_at_least
     from riskapp_server.db.session import Role
@@ -20,7 +21,7 @@ def test_ensure_role_at_least_blocks_lower_roles() -> None:
 def test_get_member_role_normalizes_role_strings(
     tmp_path, isolated_app_factory
 ) -> None:
-    """`get_member_role` should normalize values like 'Role.admin'."""
+    """get_member_role normalises legacy role strings like 'Role.admin' to 'admin'"""
 
     db_file = tmp_path / "perm_test.db"
     isolated_app_factory(f"sqlite+pysqlite:///{db_file}")

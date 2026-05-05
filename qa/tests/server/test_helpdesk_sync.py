@@ -19,6 +19,7 @@ def _setup(c: TestClient):
 
 
 def test_helpdesk_rest_crud_and_soft_delete(tmp_path, isolated_app_factory):
+    """Helpdesk tickets support full REST CRUD with soft-delete"""
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path / 'helpdesk_rest.db'}")
     with TestClient(app) as c:
         h, pid = _setup(c)
@@ -62,6 +63,7 @@ def test_helpdesk_rest_crud_and_soft_delete(tmp_path, isolated_app_factory):
 
 
 def test_helpdesk_sync_round_trip_with_legacy_base_version_zero(tmp_path, isolated_app_factory):
+    """Helpdesk sync push/pull round-trip works with legacy base_version=0 clients"""
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path / 'helpdesk_sync.db'}")
     with TestClient(app) as c:
         h, pid = _setup(c)
@@ -140,6 +142,7 @@ def test_helpdesk_sync_round_trip_with_legacy_base_version_zero(tmp_path, isolat
 
 
 def test_helpdesk_sync_delete_marks_deleted_and_is_pulled(tmp_path, isolated_app_factory):
+    """Helpdesk sync delete marks ticket deleted and is surfaced on pull"""
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path / 'helpdesk_delete.db'}")
     with TestClient(app) as c:
         h, pid = _setup(c)
@@ -182,6 +185,7 @@ def test_helpdesk_sync_delete_marks_deleted_and_is_pulled(tmp_path, isolated_app
 
 
 def test_helpdesk_update_requires_matching_base_version(isolated_app_factory, tmp_path):
+    """Helpdesk PATCH with stale base_version returns HTTP 409 with version_mismatch"""
     from fastapi.testclient import TestClient
 
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path/'helpdesk_version.db'}")

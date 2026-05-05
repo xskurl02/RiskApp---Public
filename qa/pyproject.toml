@@ -1,7 +1,7 @@
 [tool.pytest.ini_options]
 minversion = "8.0"
 testpaths = ["tests"]
-addopts = "-q"
+addopts = "--color=yes"
 
 [tool.black]
 line-length = 88

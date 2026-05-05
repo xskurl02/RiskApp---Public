@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 
 
 def test_full_password_reset_flow(tmp_path, isolated_app_factory):
+    """Full password reset flow: request token, confirm, login with new, reject old"""
     # Enable returning the reset token in responses for testing
     os.environ["PASSWORD_RESET_RETURN_TOKEN"] = "1"
 
@@ -52,6 +53,7 @@ def test_full_password_reset_flow(tmp_path, isolated_app_factory):
 
 
 def test_reset_token_cannot_be_reused(tmp_path, isolated_app_factory):
+    """Password reset token is single-use and the second confirm returns HTTP 400"""
     os.environ["PASSWORD_RESET_RETURN_TOKEN"] = "1"
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path / 'reset2.db'}")
     with TestClient(app) as c:
@@ -80,6 +82,7 @@ def test_reset_token_cannot_be_reused(tmp_path, isolated_app_factory):
 def test_reset_for_nonexistent_email_doesnt_reveal_existence(
     tmp_path, isolated_app_factory
 ):
+    """Reset request for unknown email returns generic 200 without leaking existence"""
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path / 'reset3.db'}")
     with TestClient(app) as c:
         r = c.post(

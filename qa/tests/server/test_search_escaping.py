@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 def test_search_for_percent_does_not_match_everything(
     tmp_path, isolated_app_factory
 ):
+    """Search for literal '%' is escaped and does not match every record"""
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path / 'search.db'}")
     with TestClient(app) as c:
         r = c.post(
@@ -55,6 +56,7 @@ def test_search_for_percent_does_not_match_everything(
 def test_search_for_underscore_does_not_match_single_char(
     tmp_path, isolated_app_factory
 ):
+    """Search for literal '_' is escaped and does not match arbitrary single chars"""
     app = isolated_app_factory(f"sqlite+pysqlite:///{tmp_path / 'search2.db'}")
     with TestClient(app) as c:
         r = c.post(
