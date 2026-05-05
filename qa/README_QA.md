@@ -1,35 +1,75 @@
 # QA / Tooling
 
-This folder contains formatting, linting, and test config.
+This folder contains formatting, linting, and test configuration.
 
-## Install (dev/test)
+## Recommended workflow
 
 From the repository root:
 
 ```bash
-python -m pip install -r qa/requirements-test.txt
+bash scripts/setup_python_env.sh
+bash scripts/check_project.sh
 ```
 
-## Run unit tests
+`check_project.sh` runs:
+
+```text
+qa/scripts/test.sh
+qa/scripts/lint.sh
+python -m pip check
+```
+
+## Install QA tooling manually
+
+If you are not using the setup script:
 
 ```bash
-pytest -c qa/pyproject.toml
+source .venv/bin/activate
+python -m pip install -r qa/requirements-dev.txt
 ```
 
-You can also use the convenience script:
+`qa/requirements-test.txt` is the smaller test-only install path. For normal development and clean validation, use `qa/requirements-dev.txt`.
+
+## Run unit tests
 
 ```bash
 bash qa/scripts/test.sh
 ```
 
-## Lint / Format
+Equivalent direct command:
 
 ```bash
-# lint
-bash qa/scripts/lint.sh
+pytest -c qa/pyproject.toml
+```
 
-# format
+## Lint
+
+```bash
+bash qa/scripts/lint.sh
+```
+
+The lint command uses Ruff with configuration from `qa/pyproject.toml`.
+
+## Format
+
+```bash
 bash qa/scripts/format.sh
 ```
 
-> Config lives in `qa/pyproject.toml`; the scripts pass `--config qa/pyproject.toml`.
+Use formatting intentionally; it rewrites files.
+
+## Autofix lint issues
+
+From the repository root:
+
+```bash
+bash scripts/check_project.sh --fix
+bash scripts/check_project.sh
+```
+
+## Configuration
+
+- `qa/pyproject.toml` configures pytest, Ruff, and Black.
+- `qa/requirements-dev.txt` installs QA tools.
+- The project currently does not include a pinned QA lock file.
+- Server and client runtime dependencies are pinned separately in `server/requirements.lock` and `client/requirements.lock`.
