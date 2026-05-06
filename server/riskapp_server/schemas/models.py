@@ -220,6 +220,8 @@ class AssessmentOut(ORMModel):
 
     id: uuid.UUID
     item_id: uuid.UUID
+    risk_id: uuid.UUID | None = None
+    opportunity_id: uuid.UUID | None = None
     assessor_user_id: uuid.UUID
     probability: int
     impact: int
