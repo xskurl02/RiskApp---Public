@@ -138,33 +138,6 @@ class OfflineFirstBackend(Backend):
             try:
                 projects = self.remote.list_projects()
                 self.store.sync_projects(projects)
-                remote_projects = self.remote.list_projects()
-                self.store.sync_projects(remote_projects)
-
-                # Important security/UI rule:
-                # When online, the project picker must show only projects returned
-                # by /projects for the authenticated user. The local SQLite cache
-                # may still contain old projects after membership removal because
-                # sync_projects() deliberately preserves cached projects that have
-                # local data. That cache should not make inaccessible projects
-                # visible in the sidebar.
-                if self.anonymous_offline:
-                    return [
-                        p
-                        for p in self.store.list_projects()
-                        if str(p.id).startswith("local-") and not p.created_by
-                    ]
-
-                local_projects = [
-                    p
-                    for p in self.store.list_projects()
-                    if str(p.id).startswith("local-") and p.created_by
-                ]
-
-                by_id: dict[str, Project] = {}
-                for p in list(remote_projects) + local_projects:
-                    by_id[str(p.id)] = p
-                return list(by_id.values())
             except Exception:
                 logging.getLogger(__name__).debug(
                     "Remote list_projects failed, using local cache", exc_info=True

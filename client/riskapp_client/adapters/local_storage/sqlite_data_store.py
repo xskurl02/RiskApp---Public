@@ -78,6 +78,11 @@ def _norm_text(v: str | None) -> str | None:
     s = str(v).strip()
     return s if s else None
 
+def _row_get(row: sqlite3.Row, key: str, default: Any = None) -> Any:
+    """Return a sqlite3.Row value by column name with a default."""
+    return row[key] if key in row.keys() else default
+
+
 
 class LocalStore:
     def __init__(self, db_path: str) -> None:
@@ -142,7 +147,7 @@ class LocalStore:
             id=str(row["id"]),
             name=str(row["name"]),
             description=str(row["description"] or ""),
-            created_by=str(row["created_by"]) if "created_by" in row else "",
+            created_by=str(_row_get(row, "created_by", "") or ""),
         )
 
     def create_local_project(
@@ -416,7 +421,7 @@ class LocalStore:
                 id=r["id"],
                 name=r["name"],
                 description=r["description"],
-                created_by=r.get("created_by", ""),
+                created_by=str(_row_get(r, "created_by", "") or ""),
             )
             for r in rows
         ]
@@ -737,6 +742,31 @@ class LocalStore:
             (project_id, item_type, item_id, item_id, item_id),
         ).fetchall()
         return [assessment_from_mapping(r) for r in rows]
+    
+    def _infer_assessment_item_type(
+        self, project_id: str, item_id: str, raw: dict[str, Any]
+    ) -> str:
+        """Infer whether a pulled assessment belongs to a risk or opportunity.
+
+        Some sync responses only contain item_id. If risk_id/opportunity_id are
+        missing, classify using the local parent tables instead of defaulting to
+        risk, otherwise opportunity assessments disappear from the Opportunity UI.
+        """
+        if raw.get("opportunity_id"):
+            return "opportunity"
+        if raw.get("risk_id"):
+            return "risk"
+        if self.conn.execute(
+            "SELECT 1 FROM opportunities WHERE project_id=? AND id=? LIMIT 1;",
+            (project_id, item_id),
+        ).fetchone():
+            return "opportunity"
+        if self.conn.execute(
+            "SELECT 1 FROM risks WHERE project_id=? AND id=? LIMIT 1;",
+            (project_id, item_id),
+        ).fetchone():
+            return "risk"
+        return "risk"
 
     def get_assessment_project_and_version(self, assessment_id: str) -> tuple[str, int]:
         row = self.conn.execute(
@@ -744,7 +774,7 @@ class LocalStore:
             (assessment_id,),
         ).fetchone()
         if not row:
-            raise ValueError("assessment not found")
+            raise KeyError("assessment not found in local store")
         return (str(row["project_id"]), int(row["version"]))
 
     def upsert_local_assessment(
@@ -828,17 +858,15 @@ class LocalStore:
         self, project_id: str, server_assessments: list[dict[str, Any]]
     ) -> None:
         def build_record(assessment, raw):
-            item_type = (
-                "risk"
-                if raw.get("risk_id")
-                else ("opportunity" if raw.get("opportunity_id") else "risk")
-            )
-            risk_id = str(assessment.item_id) if item_type == "risk" else None
-            opp_id = str(assessment.item_id) if item_type == "opportunity" else None
+            item_id = str(assessment.item_id)
+            item_type = self._infer_assessment_item_type(project_id, item_id, raw)
+            risk_id = item_id if item_type == "risk" else None
+            opp_id = item_id if item_type == "opportunity" else None
+
             return {
                 "risk_id": risk_id,
                 "opportunity_id": opp_id,
-                "item_id": str(assessment.item_id),
+                "item_id": item_id,
                 "item_type": str(item_type),
                 "assessor_user_id": str(assessment.assessor_user_id or ""),
                 "probability": int(assessment.probability),

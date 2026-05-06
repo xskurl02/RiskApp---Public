@@ -169,7 +169,9 @@ class SyncService:
             pull = self._pull_paginated(effective_project_id, since)
 
         server_time = str(pull.get("server_time") or utc_iso())
-        for key in ("assessments", "actions", "opportunities", "risks"):
+        # Apply parent items before child records. This lets assessment pulls
+        # that only contain item_id be classified as risk vs opportunity.
+        for key in ("risks", "opportunities", "actions", "assessments"):
             items = pull.get(key) or []
             getattr(self._store, f"apply_pull_{key}")(effective_project_id, items)
             summary[f"pulled_{key}"] = len(items)
